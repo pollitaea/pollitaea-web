@@ -33,7 +33,7 @@ export const POST = (async ({ request }) => {
 			phone: payload.phone,
 			user_metadata: {
 				username: payload.username,
-				full_name: payload.fname + ' ' + payload.lname
+				full_name: payload.fName + ' ' + payload.lName
 			}
 		})
 		.then((res) => {
