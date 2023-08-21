@@ -32,7 +32,8 @@ export const POST = (async ({ request }) => {
 			password: payload.password,
 			phone: payload.phone,
 			user_metadata: {
-				username: payload.username
+				username: payload.username,
+				full_name: payload.fname + ' ' + payload.lname
 			}
 		})
 		.then((res) => {
@@ -80,7 +81,9 @@ const isValidAuthRequest = async (request: Request) => {
 		payload.email == null ||
 		payload.username == null ||
 		payload.password == null ||
-		payload.phone == null
+		payload.phone == null ||
+		payload.fName == null ||
+		payload.lName == null
 	) {
 		return null;
 	} else return payload;
