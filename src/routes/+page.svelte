@@ -27,7 +27,10 @@
 <svelte:head>
 	<title>Pollitaea</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
-	<meta name="description" content="Home of organic music descovery. TwoTone music store" />
+	<meta
+		name="description"
+		content="Educating the masses on politics, directly from the people that write the bills. Pollitteia"
+	/>
 </svelte:head>
 
 <body>
