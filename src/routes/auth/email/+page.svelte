@@ -27,7 +27,7 @@
 		</figure>
 		{#if isValid}
 			<h2 class="mx-9">
-				Welcome to Pollitaea! Thank you for confirming your updated email. <br /> You can head back to the
+				Welcome to Pollitaea! Thank you for confirming your account. <br /> You can head back to the
 				app and sign in.
 			</h2>
 		{:else}

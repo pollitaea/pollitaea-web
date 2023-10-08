@@ -1,8 +1,8 @@
-import { error, json, type RequestHandler } from '@sveltejs/kit';
 import { SECRET } from '$env/static/private';
 import { HttpCodes } from '$lib/constants';
 import { supabase } from '$lib/supabaseClient';
 import type { User } from '@supabase/supabase-js';
+import { error, json, type RequestHandler } from '@sveltejs/kit';
 
 /**
  * @alias Get api secret
@@ -145,43 +145,47 @@ const isValidUpdateRequest = async (request: Request) => {
  * @returns result of auth validation
  */
 const handleUsernameUpdate = async (user: User, payload: { username: any; email: any }) => {
-	console.log('Searching for usernames');
+	if (user.user_metadata.username != payload.username) {
+		console.log('Searching for usernames');
 
-	const matchingUsers = await supabase
-		.from('profiles')
-		.select('*')
-		.ilike('username', `'%${payload.username}%'`);
-	console.log('matchingUsers');
-	console.log(matchingUsers);
-
-	if (matchingUsers.count) {
-		console.log('Usernames found');
-		throw error(HttpCodes.OH_NAH, {
-			code: HttpCodes.OH_NAH,
-			message: 'Username already in use'
-		});
-	} else {
-		console.log('Updating profile based on textsearch');
-		const updResults = await supabase
+		const matchingUsers = await supabase
 			.from('profiles')
-			.update({ username: payload.username }, {})
-			.eq('id', user.id);
-		if (updResults.status <= 300) {
-			supabase.auth.admin.updateUserById(user.id, {
-				email: user.email,
-				user_metadata: {
-					username: payload.username
-				}
+			.select('*')
+			.ilike('username', `'%${payload.username}%'`);
+		console.log('matchingUsers');
+		console.log(matchingUsers);
+
+		if (matchingUsers.count) {
+			console.log('Usernames found');
+			throw error(HttpCodes.OH_NAH, {
+				code: HttpCodes.OH_NAH,
+				message: 'Username already in use'
 			});
 		} else {
-			console.log("Status didn't match");
-			console.debug(updResults);
+			console.log('Updating profile based on textsearch');
+			const updResults = await supabase
+				.from('profiles')
+				.update({ username: payload.username }, {})
+				.eq('id', user.id);
+			if (updResults.status <= 300) {
+				supabase.auth.admin.updateUserById(user.id, {
+					email: user.email,
+					user_metadata: {
+						username: payload.username
+					}
+				});
+			} else {
+				console.log("Status didn't match");
+				console.debug(updResults);
 
-			throw error(updResults.status, {
-				code: updResults.status,
-				message: 'Error during profile update'
-			});
+				throw error(updResults.status, {
+					code: updResults.status,
+					message: 'Error during profile update'
+				});
+			}
 		}
+	} else {
+		console.log('No username change needed');
 	}
 };
 
@@ -192,39 +196,34 @@ const handleUsernameUpdate = async (user: User, payload: { username: any; email:
  */
 const handleEmailUpdate = async (user: User, payload: { username: any; email: any }) => {
 	if (user.email !== payload.email) {
+		const ogEmail = user.email;
 		supabase.auth.admin
-			.generateLink({
-				type: 'email_change_current',
-				email: user.email || '',
-				newEmail: payload.email
+			.updateUserById(user.id, {
+				email: payload.email,
+				email_confirm: false,
+				user_metadata: { username: payload.username }
 			})
-			.then(() =>
-				supabase.auth.admin
-					.updateUserById(user.id, {
-						email: payload.email,
-						email_confirm: false,
-						user_metadata: {
-							username: payload.username
-						}
-					})
-					.then(async (res) => {
-						if (res.error?.message) {
-							await supabase.from('logs').insert({
-								performed_by: 'SERVICE',
-								performed_on: user.id,
-								log_text: `Failed to update email, ${res.error.message}`,
-								log_date: new Date().toISOString().toLocaleLowerCase()
-							});
-							throw error(res.error.status || HttpCodes.INTERNALERROR, {
-								code: res.error.status || HttpCodes.INTERNALERROR,
-								message: res.error.message
-							});
-						}
-					})
-					.catch((err) => {
-						throw error(HttpCodes.INTERNALERROR, err.message);
-					})
-			)
+			.then(async (res) => {
+				if (res.error?.message) {
+					await supabase.from('logs').insert({
+						performed_by: 'SERVICE',
+						performed_on: user.id,
+						log_text: `Failed to update email, ${res.error.message}`,
+						log_date: new Date().toISOString().toLocaleLowerCase()
+					});
+					throw error(res.error.status || HttpCodes.INTERNALERROR, {
+						code: res.error.status || HttpCodes.INTERNALERROR,
+						message: res.error.message
+					});
+				}
+				//  else {
+				// 	supabase.auth.admin.generateLink({
+				// 		email: payload.email,
+				// 		type: 'email_change_current',
+				// 		newEmail: payload.email
+				// 	});
+				// }
+			})
 			.catch((err) => {
 				throw error(HttpCodes.INTERNALERROR, err.message);
 			});
