@@ -1,4 +1,5 @@
-import { SECRET } from '$env/static/private';
+import { REGISTRATION_SECRET, SERVER_SECRET } from '$env/static/private';
+import { isValidId } from '$lib/common';
 import { HttpCodes } from '$lib/constants';
 import { supabase } from '$lib/supabaseClient';
 import type { User } from '@supabase/supabase-js';
@@ -8,10 +9,21 @@ import { error, json, type RequestHandler } from '@sveltejs/kit';
  * @alias Get api secret
  * @returns secret: encoded secret used to confirm requests
  */
-export const GET = (() => {
-	return json({
-		secret: SECRET
-	});
+export const GET = (async ({ request }) => {
+	if (request.headers.get('id') === 'NEW_USER') {
+		return json({
+			secret: REGISTRATION_SECRET
+		});
+	} else if (
+		isValidId(request.headers.get('id')) &&
+		(await supabase.auth.admin.getUserById(request.headers.get('id') as string)).data?.user != null
+	) {
+		return json({
+			secret: SERVER_SECRET
+		});
+	} else {
+		throw error(401, { code: HttpCodes.UNAUTHORIZED, message: 'Unautorized User' });
+	}
 }) satisfies RequestHandler;
 
 /**
@@ -108,7 +120,7 @@ export const PUT = (async ({ request }) => {
 const isValidAuthRequest = async (request: Request) => {
 	const payload = await request.json();
 	if (
-		payload.secret !== SECRET ||
+		payload.secret !== REGISTRATION_SECRET ||
 		payload.secret == null ||
 		payload.email == null ||
 		payload.username == null ||
@@ -129,7 +141,7 @@ const isValidAuthRequest = async (request: Request) => {
 const isValidUpdateRequest = async (request: Request) => {
 	const payload = await request.json();
 	if (
-		payload.secret !== SECRET ||
+		payload.secret !== SERVER_SECRET ||
 		payload.secret == null ||
 		payload.email == null ||
 		payload.username == null ||
