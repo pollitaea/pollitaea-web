@@ -9,7 +9,7 @@ import { supabase } from './supabaseClient';
  */
 export const isValidPolRequest = async (request: Request) => {
 	const requestId = request.headers.get('id');
-	if (requestId === null || (await supabase.auth.admin.getUserById(requestId)).data !== undefined) {
+	if (requestId === null || (await supabase.auth.admin.getUserById(requestId)).data === null) {
 		throw error(HttpCodes.UNAUTHORIZED, {
 			code: HttpCodes.UNAUTHORIZED,
 			message: 'Invalid user'
