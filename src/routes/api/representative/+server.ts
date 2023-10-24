@@ -4,15 +4,13 @@ import { error, json, type RequestHandler } from '@sveltejs/kit';
 import { REPRESENTATIVE_KEY } from '$env/static/private';
 import { ExternalServices, type CivicInfoResponse } from '$lib/constants';
 
+/**
+ * Get endpoint for getting representative info based on provided address
+ */
 export const GET = (async ({ request }) => {
+	// Chop from the `?` onwards i.e. http://localhost:5173/api/voter?address=xyz
 	const requestQuery = querystring.parse(request.url.split('?')[1]).address;
 	await isValidPolRequest(request, requestQuery);
-	console.log(
-		'Request\n' +
-			ExternalServices.RepSearch +
-			'?' +
-			querystring.stringify({ key: REPRESENTATIVE_KEY, address: requestQuery })
-	);
 
 	return await fetch(
 		ExternalServices.RepSearch +
