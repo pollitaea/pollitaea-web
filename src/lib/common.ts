@@ -7,9 +7,20 @@ import { supabase } from './supabaseClient';
  * @param request
  * @returns result of auth validation
  */
-export const isValidPolRequest = async (request: Request) => {
+export const isValidPolRequest = async (
+	request: Request,
+	address: string | string[] | undefined
+) => {
 	const requestId = request.headers.get('id');
-	if (requestId === null || (await supabase.auth.admin.getUserById(requestId)).data !== undefined) {
+	if (address === undefined) {
+		throw error(HttpCodes.BADREQUEST, {
+			code: HttpCodes.BADREQUEST,
+			message: 'No address provided'
+		});
+	} else if (
+		requestId === null ||
+		(await supabase.auth.admin.getUserById(requestId)).data === null
+	) {
 		throw error(HttpCodes.UNAUTHORIZED, {
 			code: HttpCodes.UNAUTHORIZED,
 			message: 'Invalid user'
