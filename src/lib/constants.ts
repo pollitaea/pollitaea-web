@@ -108,6 +108,7 @@ type StateElectionInfo = {
 
 export type VoterInfoResponse = {
 	election: Election;
+	otherElections?: Election[];
 	normalizedInput: Address;
 	pollingLocations: PollingLocation[];
 	earlyVoteSites: PollingLocation[];

@@ -21,6 +21,7 @@ export const GET = (async ({ request }) => {
 			const voterInfoResponse = {
 				normalizedAddress: data.normalizedInput,
 				election: data.election,
+				otherElections: data.otherElections,
 				// Find polling locations with any official sources
 				pollingLocations: data.pollingLocations.filter((pollLocation) =>
 					pollLocation.sources.find((item) => item.official)
