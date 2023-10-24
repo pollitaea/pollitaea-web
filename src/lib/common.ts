@@ -4,8 +4,8 @@ import { supabase } from './supabaseClient';
 
 /**
  * Validates Pol requests
- * @param request
- * @returns result of auth validation
+ * @param request Request recieved from client
+ * @throws error if invalid
  */
 export const isValidPolRequest = async (
 	request: Request,
@@ -28,6 +28,11 @@ export const isValidPolRequest = async (
 	}
 };
 
+/**
+ * Validates if id provided is valid
+ * @param id string recieved from client
+ * @returns boolean
+ */
 export const isValidId = (id: string | null) => {
 	//741c60de-f658-4978-b363-d7aa24101261
 	return (
