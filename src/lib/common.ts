@@ -18,7 +18,7 @@ export const isValidPolRequest = async (
 			message: 'No address provided'
 		});
 	} else if (
-		requestId === null ||
+		!isValidId(requestId) ||
 		(await supabase.auth.admin.getUserById(requestId)).data === null
 	) {
 		throw error(HttpCodes.UNAUTHORIZED, {
