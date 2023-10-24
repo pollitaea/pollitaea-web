@@ -7,6 +7,50 @@ export const HttpCodes = {
 };
 
 export const ExternalServices = {
-	RepSearch: "https://www.googleapis.com/civicinfo/v2/representatives",
-	VoterInfo: "https://www.googleapis.com/civicinfo/v2/voterinfo",
-}
+	RepSearch: 'https://www.googleapis.com/civicinfo/v2/representatives',
+	VoterInfo: 'https://www.googleapis.com/civicinfo/v2/voterinfo'
+};
+
+type Address = {
+	line1: string;
+	city: string;
+	state: string;
+	zip: string;
+};
+
+type Official = {
+	name: string;
+	address?: Address[];
+	party?: string;
+	phones?: string[];
+	urls?: string[];
+	photoUrl?: string;
+	emails?: string[];
+	channels?: {
+		type: string;
+		id: string;
+	}[];
+};
+
+type Division = {
+	name: string;
+	officeIndices?: number[];
+};
+
+type Office = {
+	name: string;
+	divisionId: string;
+	levels: string[];
+	roles: string[];
+	officialIndices: number[];
+};
+
+export type CivicInfoResponse = {
+	normalizedInput: Address;
+	kind: string;
+	divisions: {
+		[key: string]: Division;
+	};
+	offices: Office[];
+	officials: Official[];
+};
